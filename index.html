@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Dark Home Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 50%, #000000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1.5rem 2rem 0.75rem;
+      text-align: center;
+    }
+
+    .center-container {
+      display: none;
+    }
+
+    h1 {
+      font-size: 3rem;
+      letter-spacing: 0.05em;
+      color: #f9fafb;
+      text-shadow: 0 0 18px rgba(59, 130, 246, 0.45);
+    }
+
+    header::after {
+      content: '';
+      display: block;
+      width: 180px;
+      height: 2px;
+      margin: 0.75rem auto 0;
+      background: linear-gradient(90deg, transparent, #38bdf8, #a855f7, transparent);
+      opacity: 0.7;
+    }
+
+    .button-wrapper {
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .panel {
+      background: rgba(15, 23, 42, 0.98);
+      padding: 1.5rem 2rem;
+      border-radius: 0.9rem;
+      width: 320px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+    }
+
+    .panel h2 {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .panel-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .panel label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      color: #9ca3af;
+    }
+
+    .panel input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    .panel input:focus,
+    .panel select:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+    }
+
+    .panel select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e5e7eb;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .panel .section-new-input {
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .panel .section-new-input.show {
+      display: block;
+    }
+
+    .panel-actions {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .links-container {
+      flex: 1;
+      padding: 1.5rem 2.5rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .section {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .section.dragging {
+      opacity: 0.5;
+    }
+
+    .section.drag-over {
+      border-top: 2px solid rgba(94, 234, 212, 0.8);
+      padding-top: 0.5rem;
+    }
+
+    .section.reordering {
+      cursor: move;
+      border: 1px dashed rgba(94, 234, 212, 0.4);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      color: #9ca3af;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      cursor: inherit;
+    }
+
+    .section.reordering .section-title {
+      cursor: move;
+    }
+
+    .panel-sections-list {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .panel-sections-list h3 {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+    }
+
+    .section-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .section-list-item-name {
+      flex: 1;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+    }
+
+    .section-list-delete-btn {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-list-delete-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fee2e2;
+    }
+
+    .section-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+      text-align: center;
+    }
+
+    button {
+      padding: 0.7rem 2.4rem;
+      font-size: 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      cursor: pointer;
+      color: #e5e7eb;
+      background: radial-gradient(circle at top left, #1d283a, #020617);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.85);
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top left, #2563eb, #0f172a);
+      border-color: rgba(96, 165, 250, 0.8);
+      color: #f9fafb;
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.9);
+      background: radial-gradient(circle at bottom right, #1d4ed8, #020617);
+    }
+
+    .link-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.9);
+      object-fit: contain;
+    }
+
+    .delete-mode-btn {
+      background: radial-gradient(circle at top left, #7f1d1d, #450a0a);
+      position: fixed;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      z-index: 20;
+      padding-inline: 1.75rem;
+    }
+
+    .delete-mode-btn.active {
+      background: radial-gradient(circle at top left, #b91c1c, #7f1d1d);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.7), 0 10px 26px rgba(15, 23, 42, 0.9);
+    }
+
+    .reorder-mode-btn {
+      background: radial-gradient(circle at top left, #0f766e, #064e3b);
+      position: fixed;
+      left: 1.5rem;
+      bottom: 1.5rem;
+      z-index: 20;
+      padding-inline: 1.75rem;
+    }
+
+    .reorder-mode-btn.active {
+      background: radial-gradient(circle at top left, #14b8a6, #0f766e);
+      box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.7), 0 10px 26px rgba(15, 23, 42, 0.9);
+    }
+
+    .reorder-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .link-button.reordering {
+      border-style: dashed;
+      border-color: rgba(94, 234, 212, 0.8);
+      background: radial-gradient(circle at top left, #022c22, #020617);
+    }
+
+    .open-panel-btn {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      padding-inline: 1.75rem;
+    }
+
+    .plus-icon,
+    .minus-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to My Dark Page</h1>
+  </header>
+
+  <main class="center-container">
+    <div class="button-wrapper">
+    </div>
+  </main>
+
+  <section class="links-container" id="links-container">
+    <!-- New buttons will appear here -->
+  </section>
+
+  <div class="panel-backdrop" id="panel-backdrop">
+    <div class="panel" role="dialog" aria-modal="true">
+      <h2>Add Website Button</h2>
+      <div class="panel-group">
+        <label for="site-domain">Website Domain</label>
+        <input type="text" id="site-domain" placeholder="e.g. google.com" />
+      </div>
+      <div class="panel-group">
+        <label for="site-section">Section</label>
+        <select id="site-section">
+          <option value="">Select or create section...</option>
+        </select>
+        <input type="text" id="section-new-input" class="section-new-input" placeholder="New section name..." />
+        <button type="button" id="new-section-btn" style="margin-top: 0.5rem; padding: 0.4rem 1rem; font-size: 0.85rem;">+ New Section</button>
+      </div>
+      <div class="panel-sections-list">
+        <h3>Manage Sections</h3>
+        <div id="sections-list-container"></div>
+      </div>
+      <div class="panel-actions">
+        <button type="button" id="cancel-panel-btn">Cancel</button>
+        <button type="button" id="create-site-btn">Create Button</button>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" id="open-panel-btn" class="open-panel-btn">
+    <span class="plus-icon">+</span>
+    <span>CreateBtn</span>
+  </button>
+  <button type="button" id="delete-mode-btn" class="delete-mode-btn">
+    <span class="minus-icon">-</span>
+    <span id="delete-mode-text">Remove: Off</span>
+  </button>
+  <button type="button" id="reorder-mode-btn" class="reorder-mode-btn">
+    <span class="reorder-icon">⇅</span>
+    <span id="reorder-mode-text">Reorder: Off</span>
+  </button>
+
+  <script>
+    const openPanelBtn = document.getElementById('open-panel-btn');
+    const deleteModeBtn = document.getElementById('delete-mode-btn');
+    const reorderModeBtn = document.getElementById('reorder-mode-btn');
+    const panelBackdrop = document.getElementById('panel-backdrop');
+    const cancelPanelBtn = document.getElementById('cancel-panel-btn');
+    const createSiteBtn = document.getElementById('create-site-btn');
+    const siteDomainInput = document.getElementById('site-domain');
+    const siteSectionSelect = document.getElementById('site-section');
+    const sectionNewInput = document.getElementById('section-new-input');
+    const newSectionBtn = document.getElementById('new-section-btn');
+    const linksContainer = document.getElementById('links-container');
+
+    let deleteMode = false;
+    let reorderMode = false;
+    let dragSourceId = null;
+    let dragSectionId = null;
+    let sites = [];
+    let sections = [];
+
+    function saveSites() {
+      try {
+        localStorage.setItem('myfiles_saved_sites', JSON.stringify(sites));
+      } catch (e) {
+        console.warn('Could not save sites', e);
+      }
+    }
+
+    function saveSections() {
+      try {
+        localStorage.setItem('myfiles_saved_sections', JSON.stringify(sections));
+      } catch (e) {
+        console.warn('Could not save sections', e);
+      }
+    }
+
+    function loadSites() {
+      try {
+        const raw = localStorage.getItem('myfiles_saved_sites');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        console.warn('Could not load sites', e);
+      }
+      return [];
+    }
+
+    function loadSections() {
+      try {
+        const raw = localStorage.getItem('myfiles_saved_sections');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        console.warn('Could not load sections', e);
+      }
+      return [];
+    }
+
+    function updateSectionDropdown() {
+      siteSectionSelect.innerHTML = '<option value="">Select or create section...</option>';
+      sections.forEach((section) => {
+        const option = document.createElement('option');
+        option.value = section.id;
+        option.textContent = section.name;
+        siteSectionSelect.appendChild(option);
+      });
+    }
+
+    function renderSectionsList() {
+      const container = document.getElementById('sections-list-container');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      if (sections.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.color = '#6b7280';
+        emptyMsg.style.fontSize = '0.85rem';
+        emptyMsg.textContent = 'No sections yet. Create one above.';
+        container.appendChild(emptyMsg);
+        return;
+      }
+      
+      sections.forEach((section) => {
+        const item = document.createElement('div');
+        item.className = 'section-list-item';
+        
+        const name = document.createElement('div');
+        name.className = 'section-list-item-name';
+        name.textContent = section.name;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'section-list-delete-btn';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = '×';
+        deleteBtn.title = 'Delete section';
+        deleteBtn.addEventListener('click', () => {
+          deleteSection(section.id);
+        });
+        
+        item.appendChild(name);
+        item.appendChild(deleteBtn);
+        container.appendChild(item);
+      });
+    }
+
+    function getOrCreateSection(sectionId) {
+      if (!sectionId) {
+        // Create default section if none exists
+        if (sections.length === 0) {
+          const defaultSection = {
+            id: 'default-' + Date.now(),
+            name: 'Default',
+            order: 0,
+          };
+          sections.push(defaultSection);
+          saveSections();
+          return defaultSection;
+        }
+        return sections[0];
+      }
+      return sections.find((s) => s.id === sectionId) || sections[0];
+    }
+
+    function getSectionElement(sectionId) {
+      const sectionEl = document.querySelector(`.section[data-section-id="${sectionId}"]`);
+      if (sectionEl) {
+        // Ensure drag handlers are set up
+        if (!sectionEl.hasAttribute('data-drag-setup')) {
+          const titleEl = sectionEl.querySelector('.section-title');
+          if (titleEl) {
+            setupSectionDragHandlers(sectionEl, titleEl, sectionId);
+            sectionEl.setAttribute('data-drag-setup', 'true');
+          }
+        }
+        return sectionEl;
+      }
+      
+      // Create section element if it doesn't exist
+      const section = getOrCreateSection(sectionId);
+      const newSectionEl = document.createElement('div');
+      newSectionEl.className = 'section';
+      newSectionEl.dataset.sectionId = section.id;
+      
+      const titleEl = document.createElement('div');
+      titleEl.className = 'section-title';
+      titleEl.textContent = section.name;
+      
+      const buttonsEl = document.createElement('div');
+      buttonsEl.className = 'section-buttons';
+      
+      newSectionEl.appendChild(titleEl);
+      newSectionEl.appendChild(buttonsEl);
+      
+      // Add drag handlers for section reordering (on title to avoid button conflicts)
+      setupSectionDragHandlers(newSectionEl, titleEl, section.id);
+      newSectionEl.setAttribute('data-drag-setup', 'true');
+      
+      // Insert in order
+      const allSections = Array.from(linksContainer.querySelectorAll('.section'));
+      let inserted = false;
+      for (let i = 0; i < sections.length; i++) {
+        const s = sections[i];
+        if (s.id === section.id) {
+          if (i === 0) {
+            linksContainer.insertBefore(newSectionEl, linksContainer.firstChild);
+          } else {
+            const prevSection = allSections.find((el) => el.dataset.sectionId === sections[i - 1].id);
+            if (prevSection) {
+              prevSection.parentNode.insertBefore(newSectionEl, prevSection.nextSibling);
+            } else {
+              linksContainer.appendChild(newSectionEl);
+            }
+          }
+          inserted = true;
+          break;
+        }
+      }
+      if (!inserted) {
+        linksContainer.appendChild(newSectionEl);
+      }
+      
+      return newSectionEl;
+    }
+
+    function setupSectionDragHandlers(sectionEl, titleEl, sectionId) {
+      // Attach drag handlers to title, but move the entire section
+      titleEl.addEventListener('dragstart', (e) => {
+        if (!reorderMode) {
+          e.preventDefault();
+          return;
+        }
+        e.stopPropagation();
+        dragSectionId = sectionId;
+        sectionEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      titleEl.addEventListener('dragend', (e) => {
+        e.stopPropagation();
+        sectionEl.classList.remove('dragging');
+        dragSectionId = null;
+        // Remove drag-over class from all sections
+        linksContainer.querySelectorAll('.section').forEach((s) => {
+          s.classList.remove('drag-over');
+        });
+      });
+
+      // Handle dragover on the section element (for drop target)
+      sectionEl.addEventListener('dragover', (e) => {
+        if (!reorderMode || dragSectionId === null || dragSectionId === sectionId) return;
+        // Don't handle if dragging from within this section's buttons
+        if (e.target.closest('.section-buttons')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+        
+        // Remove drag-over from all sections
+        linksContainer.querySelectorAll('.section').forEach((s) => {
+          s.classList.remove('drag-over');
+        });
+        
+        // Add drag-over to current section
+        sectionEl.classList.add('drag-over');
+      });
+
+      sectionEl.addEventListener('drop', (e) => {
+        if (!reorderMode || dragSectionId === null || dragSectionId === sectionId) return;
+        // Don't handle if dropping on buttons
+        if (e.target.closest('.section-buttons')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const draggedSection = linksContainer.querySelector(`.section[data-section-id="${dragSectionId}"]`);
+        if (draggedSection && draggedSection !== sectionEl) {
+          // Reorder in DOM - this moves the entire section with all its buttons
+          linksContainer.insertBefore(draggedSection, sectionEl);
+          
+          // Update sections array order
+          updateSectionsOrderFromDom();
+        }
+        
+        sectionEl.classList.remove('drag-over');
+      });
+    }
+
+    function updateSectionsOrderFromDom() {
+      const orderedIds = Array.from(linksContainer.querySelectorAll('.section')).map(
+        (sectionEl) => sectionEl.dataset.sectionId
+      );
+      
+      const map = new Map(sections.map((s) => [s.id, s]));
+      const reordered = [];
+      orderedIds.forEach((id) => {
+        const section = map.get(id);
+        if (section) {
+          section.order = reordered.length;
+          reordered.push(section);
+        }
+      });
+      
+      sections = reordered;
+      saveSections();
+    }
+
+    function deleteSection(sectionId) {
+      if (sections.length <= 1) {
+        alert('Cannot delete the last section. Create another section first.');
+        return;
+      }
+      
+      if (!confirm('Delete this section? Buttons in this section will be moved to the default section.')) {
+        return;
+      }
+      
+      // Find default section or first available section
+      const defaultSection = sections.find(s => s.name === 'Default') || sections.find(s => s.id !== sectionId);
+      if (!defaultSection) return;
+      
+      // Move all buttons from deleted section to default section
+      sites.forEach(site => {
+        if (site.sectionId === sectionId) {
+          site.sectionId = defaultSection.id;
+        }
+      });
+      
+      // Remove section from array
+      const sectionIndex = sections.findIndex(s => s.id === sectionId);
+      if (sectionIndex !== -1) {
+        sections.splice(sectionIndex, 1);
+        saveSections();
+      }
+      
+      // Remove section element from DOM
+      const sectionEl = document.querySelector(`.section[data-section-id="${sectionId}"]`);
+      if (sectionEl) {
+        const buttons = Array.from(sectionEl.querySelectorAll('.link-button'));
+        buttons.forEach(btn => {
+          btn.remove();
+        });
+        sectionEl.remove();
+      }
+      
+      // Re-render all buttons in their new sections
+      linksContainer.innerHTML = '';
+      sites.forEach(createSiteButton);
+      
+      // Update dropdown and sections list
+      updateSectionDropdown();
+      renderSectionsList();
+      
+      saveSites();
+    }
+
+    function updateSitesOrderFromDom() {
+      const reordered = [];
+      const sectionsEls = Array.from(linksContainer.querySelectorAll('.section'));
+      
+      sectionsEls.forEach((sectionEl) => {
+        const sectionId = sectionEl.dataset.sectionId;
+        const buttons = Array.from(sectionEl.querySelectorAll('.section-buttons button[data-id]'));
+        buttons.forEach((btn) => {
+          const site = sites.find((s) => s.id === btn.dataset.id);
+          if (site) {
+            site.sectionId = sectionId;
+            reordered.push(site);
+          }
+        });
+      });
+      
+      sites = reordered;
+      saveSites();
+    }
+
+    function createSiteButton(site) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.id = site.id;
+      btn.classList.add('link-button');
+
+      const icon = document.createElement('img');
+      icon.className = 'link-icon';
+      icon.src = site.faviconUrl;
+      icon.alt = '';
+
+      const label = document.createElement('span');
+      label.textContent = site.name;
+
+      btn.appendChild(icon);
+      btn.appendChild(label);
+
+      btn.addEventListener('dragstart', (e) => {
+        if (!reorderMode) {
+          e.preventDefault();
+          return;
+        }
+        dragSourceId = site.id;
+        btn.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      btn.addEventListener('dragend', () => {
+        btn.classList.remove('dragging');
+        dragSourceId = null;
+      });
+
+      btn.addEventListener('dragover', (e) => {
+        if (!reorderMode || dragSourceId === null || dragSourceId === site.id) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+
+      btn.addEventListener('drop', (e) => {
+        if (!reorderMode || dragSourceId === null || dragSourceId === site.id) return;
+        e.preventDefault();
+        const dragged = linksContainer.querySelector(`button[data-id="${dragSourceId}"]`);
+        if (dragged && dragged !== btn) {
+          const buttonsContainer = btn.closest('.section-buttons');
+          if (buttonsContainer) {
+            buttonsContainer.insertBefore(dragged, btn);
+            updateSitesOrderFromDom();
+          }
+        }
+      });
+
+      btn.addEventListener('click', () => {
+        if (deleteMode) {
+          const idx = sites.findIndex((s) => s.id === site.id);
+          if (idx !== -1) {
+            sites.splice(idx, 1);
+            saveSites();
+          }
+          btn.remove();
+          // Remove section if empty
+          const sectionEl = btn.closest('.section');
+          if (sectionEl) {
+            const buttonsContainer = sectionEl.querySelector('.section-buttons');
+            if (buttonsContainer && buttonsContainer.children.length === 0) {
+              sectionEl.remove();
+            }
+          }
+        } else if (reorderMode) {
+          // Reorder mode: prompt for index
+          const buttonsContainer = btn.closest('.section-buttons');
+          if (!buttonsContainer) return;
+          
+          const allButtons = Array.from(buttonsContainer.querySelectorAll('.link-button'));
+          const maxIndex = allButtons.length - 1;
+          
+          const indexInput = prompt(
+            `Enter position (0-${maxIndex}) to move "${site.name}" to:\n\nCurrent position: ${allButtons.indexOf(btn)}`,
+            allButtons.indexOf(btn).toString()
+          );
+          
+          if (indexInput === null) return; // User cancelled
+          
+          const targetIndex = parseInt(indexInput, 10);
+          if (isNaN(targetIndex) || targetIndex < 0 || targetIndex > maxIndex) {
+            alert(`Please enter a valid number between 0 and ${maxIndex}`);
+            return;
+          }
+          
+          const currentIndex = allButtons.indexOf(btn);
+          if (currentIndex === targetIndex) return; // Already at target position
+          
+          // Remove button from current position
+          btn.remove();
+          
+          // Insert at target position
+          if (targetIndex === 0) {
+            buttonsContainer.insertBefore(btn, buttonsContainer.firstChild);
+          } else if (targetIndex >= allButtons.length - 1) {
+            buttonsContainer.appendChild(btn);
+          } else {
+            const targetButton = allButtons[targetIndex];
+            buttonsContainer.insertBefore(btn, targetButton);
+          }
+          
+          // Update order
+          updateSitesOrderFromDom();
+        } else {
+          window.open(site.url, '_blank');
+        }
+      });
+
+      const sectionId = site.sectionId || (sections.length > 0 ? sections[0].id : null);
+      const sectionEl = getSectionElement(sectionId);
+      const buttonsContainer = sectionEl.querySelector('.section-buttons');
+      buttonsContainer.appendChild(btn);
+    }
+
+    function openPanel() {
+      updateSectionDropdown();
+      renderSectionsList();
+      panelBackdrop.style.display = 'flex';
+      siteDomainInput.focus();
+    }
+
+    function closePanel() {
+      panelBackdrop.style.display = 'none';
+      siteDomainInput.value = '';
+      siteSectionSelect.value = '';
+      sectionNewInput.value = '';
+      sectionNewInput.classList.remove('show');
+    }
+
+    openPanelBtn.addEventListener('click', openPanel);
+    cancelPanelBtn.addEventListener('click', closePanel);
+
+    panelBackdrop.addEventListener('click', (event) => {
+      if (event.target === panelBackdrop) {
+        closePanel();
+      }
+    });
+
+    const deleteModeText = document.getElementById('delete-mode-text');
+    const reorderModeText = document.getElementById('reorder-mode-text');
+
+    deleteModeBtn.addEventListener('click', () => {
+      deleteMode = !deleteMode;
+      if (deleteMode) {
+        deleteModeBtn.classList.add('active');
+        deleteModeText.textContent = 'Remove: On';
+      } else {
+        deleteModeBtn.classList.remove('active');
+        deleteModeText.textContent = 'Remove: Off';
+      }
+    });
+
+    reorderModeBtn.addEventListener('click', () => {
+      reorderMode = !reorderMode;
+      if (reorderMode) {
+        reorderModeBtn.classList.add('active');
+        reorderModeText.textContent = 'Reorder: On';
+        // Enable button reordering (click to reorder by index)
+        linksContainer.querySelectorAll('.link-button').forEach((btn) => {
+          btn.classList.add('reordering');
+          // Don't set draggable - we use click to reorder by index
+        });
+        // Enable section reordering (on title)
+        linksContainer.querySelectorAll('.section').forEach((sectionEl) => {
+          sectionEl.classList.add('reordering');
+          const titleEl = sectionEl.querySelector('.section-title');
+          if (titleEl) {
+            titleEl.setAttribute('draggable', 'true');
+          }
+        });
+      } else {
+        reorderModeBtn.classList.remove('active');
+        reorderModeText.textContent = 'Reorder: Off';
+        // Disable button reordering
+        linksContainer.querySelectorAll('.link-button').forEach((btn) => {
+          btn.classList.remove('reordering');
+        });
+        // Disable section reordering (on title)
+        linksContainer.querySelectorAll('.section').forEach((sectionEl) => {
+          sectionEl.classList.remove('reordering');
+          sectionEl.classList.remove('drag-over');
+          const titleEl = sectionEl.querySelector('.section-title');
+          if (titleEl) {
+            titleEl.setAttribute('draggable', 'false');
+          }
+        });
+        updateSitesOrderFromDom();
+        updateSectionsOrderFromDom();
+      }
+    });
+
+    newSectionBtn.addEventListener('click', () => {
+      sectionNewInput.classList.toggle('show');
+      if (sectionNewInput.classList.contains('show')) {
+        sectionNewInput.focus();
+      } else {
+        sectionNewInput.value = '';
+      }
+    });
+
+    sectionNewInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const name = sectionNewInput.value.trim();
+        if (name) {
+          const newSection = {
+            id: 'section-' + Date.now() + Math.random().toString(16).slice(2),
+            name: name,
+            order: sections.length,
+          };
+          sections.push(newSection);
+          saveSections();
+          updateSectionDropdown();
+          renderSectionsList();
+          siteSectionSelect.value = newSection.id;
+          sectionNewInput.value = '';
+          sectionNewInput.classList.remove('show');
+        }
+      }
+    });
+
+    createSiteBtn.addEventListener('click', () => {
+      const domain = siteDomainInput.value.trim();
+
+      if (!domain) {
+        alert('Please enter the domain.');
+        return;
+      }
+
+      let url = domain;
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      // Derive domain for favicon (strip protocol and path)
+      const domainOnly = domain.replace(/^https?:\/\//i, '').split('/')[0];
+
+      // Derive a readable name from the domain
+      let base = domainOnly.toLowerCase();
+      if (base.startsWith('www.')) {
+        base = base.slice(4);
+      }
+      const firstPart = base.split('.')[0] || base;
+      const name = firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+      const faviconUrl =
+        'https://www.google.com/s2/favicons?domain=' +
+        encodeURIComponent(domainOnly) +
+        '&sz=32';
+
+      // Get selected section or create default
+      let sectionId = siteSectionSelect.value;
+      if (!sectionId && sections.length === 0) {
+        // Create default section if none exists
+        const defaultSection = {
+          id: 'default-' + Date.now(),
+          name: 'Default',
+          order: 0,
+        };
+        sections.push(defaultSection);
+        saveSections();
+        sectionId = defaultSection.id;
+      } else if (!sectionId) {
+        sectionId = sections[0].id;
+      }
+
+      const site = {
+        id: Date.now().toString() + Math.random().toString(16).slice(2),
+        name,
+        domain,
+        url,
+        faviconUrl,
+        sectionId: sectionId || null,
+      };
+
+      sites.push(site);
+      saveSites();
+      createSiteButton(site);
+      closePanel();
+    });
+
+    // Load saved data on page load
+    sections = loadSections();
+    sites = loadSites();
+    
+    // Sort sections by order
+    sections.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    // Create default section if none exists and we have sites
+    if (sections.length === 0 && sites.length > 0) {
+      const defaultSection = {
+        id: 'default-' + Date.now(),
+        name: 'Default',
+        order: 0,
+      };
+      sections.push(defaultSection);
+      saveSections();
+    }
+    
+    // Render all buttons in their sections
+    sites.forEach(createSiteButton);
+  </script>
+</body>
+</html>
