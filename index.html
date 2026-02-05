@@ -240,6 +240,15 @@
       align-content: center;
       text-align: center;
     }
+    .section-buttons button {
+  display: inline-flex;       /* already set */
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;      /* optional: smaller padding if needed */
+  width: auto;               /* 🔥 make width fit content */
+  min-width: 0;              /* remove minimum width constraint */
+}
+
 
     button {
       padding: 0.7rem 2.4rem;
@@ -326,12 +335,47 @@
       background: radial-gradient(circle at top left, #022c22, #020617);
     }
 
-    .open-panel-btn {
-      position: fixed;
-      top: 1.5rem;
-      right: 1.5rem;
-      padding-inline: 1.75rem;
-    }
+   
+   .open-panel-btn.circular {
+  width: 28px;
+  height: 28px;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+
+  padding: 0;              /* 🔥 important: remove padding */
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.open-panel-btn.circular .plus-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 1rem;
+  line-height: 1;
+}
+.circular {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular .plus-icon,
+.circular .minus-icon,
+.circular .reorder-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 1rem;
+  line-height: 1;
+}
 
     .plus-icon,
     .minus-icon {
@@ -344,11 +388,24 @@
       justify-content: center;
       font-size: 1rem;
     }
+ .delete-mode-btn.circular,
+.reorder-mode-btn.circular {
+  padding: 0 !important;   /* kill padding-inline */
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
   </style>
 </head>
 <body>
   <header>
-    <h1>Welcome to My Dark Page</h1>
+    <h1>My Work Page</h1>
   </header>
 
   <main class="center-container">
@@ -386,18 +443,45 @@
     </div>
   </div>
 
-  <button type="button" id="open-panel-btn" class="open-panel-btn">
-    <span class="plus-icon">+</span>
-    <span>CreateBtn</span>
+  <button type="button" id="open-panel-btn" class="open-panel-btn circular">
+  <span class="plus-icon">+</span>
+</button>
+
+<button type="button" id="delete-mode-btn" class="delete-mode-btn circular">
+  <span class="minus-icon">-</span>
+</button>
+
+<button type="button" id="reorder-mode-btn" class="reorder-mode-btn circular">
+  <span class="reorder-icon">⇅</span>
+</button>
+<button type="button" id="reorder-section-btn" class="reorder-mode-btn circular" style="left: 4rem;">
+  <span class="reorder-icon">?</span>
+</button>
+
+
+
+
+   
   </button>
-  <button type="button" id="delete-mode-btn" class="delete-mode-btn">
-    <span class="minus-icon">-</span>
-    <span id="delete-mode-text">Remove: Off</span>
-  </button>
-  <button type="button" id="reorder-mode-btn" class="reorder-mode-btn">
-    <span class="reorder-icon">⇅</span>
-    <span id="reorder-mode-text">Reorder: Off</span>
-  </button>
+<div class="panel-backdrop" id="reorder-section-panel" style="display: none;">
+  <div class="panel" role="dialog" aria-modal="true">
+    <h2>Reorder Section</h2>
+    <div class="panel-group">
+      <label for="reorder-section-select">Choose Section</label>
+      <select id="reorder-section-select">
+        <option value="">Select a section...</option>
+      </select>
+    </div>
+    <div class="panel-group">
+      <label for="reorder-section-index">New Position (0 = first)</label>
+      <input type="number" id="reorder-section-index" min="0" placeholder="Enter new position" />
+    </div>
+    <div class="panel-actions">
+      <button type="button" id="cancel-reorder-section-btn">Cancel</button>
+      <button type="button" id="apply-reorder-section-btn">Apply</button>
+    </div>
+  </div>
+</div>
 
   <script>
     const openPanelBtn = document.getElementById('open-panel-btn');
@@ -1038,9 +1122,79 @@
       sections.push(defaultSection);
       saveSections();
     }
-    
+  
+
+
     // Render all buttons in their sections
     sites.forEach(createSiteButton);
+
+
+// -------------------- NEW: Reorder Section Panel --------------------
+const reorderSectionBtn = document.getElementById('reorder-section-btn');
+const reorderPanel = document.getElementById('reorder-section-panel');
+const reorderSectionSelect = document.getElementById('reorder-section-select');
+const reorderSectionIndex = document.getElementById('reorder-section-index');
+const cancelReorderSectionBtn = document.getElementById('cancel-reorder-section-btn');
+const applyReorderSectionBtn = document.getElementById('apply-reorder-section-btn');
+
+// Open panel
+reorderSectionBtn.addEventListener('click', () => {
+  reorderSectionSelect.innerHTML = '<option value="">Select a section...</option>';
+  sections.forEach((s, idx) => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.name} (current: ${idx})`;
+    reorderSectionSelect.appendChild(opt);
+  });
+
+  reorderSectionIndex.value = '';
+  reorderPanel.style.display = 'flex';
+});
+
+// Close panel
+cancelReorderSectionBtn.addEventListener('click', () => {
+  reorderPanel.style.display = 'none';
+});
+
+// Apply reorder
+applyReorderSectionBtn.addEventListener('click', () => {
+  const sectionId = reorderSectionSelect.value;
+  const newIndex = parseInt(reorderSectionIndex.value, 10);
+
+  if (!sectionId) {
+    alert('Please select a section.');
+    return;
+  }
+
+  if (isNaN(newIndex) || newIndex < 0 || newIndex >= sections.length) {
+    alert(`Please enter a valid position between 0 and ${sections.length - 1}`);
+    return;
+  }
+
+  // Find current index
+  const currentIndex = sections.findIndex(s => s.id === sectionId);
+  if (currentIndex === -1) return;
+
+  // Remove section from array
+  const [section] = sections.splice(currentIndex, 1);
+
+  // Insert at new index
+  sections.splice(newIndex, 0, section);
+
+  // Update order properties
+  sections.forEach((s, idx) => s.order = idx);
+
+  saveSections();
+
+  // Re-render sections and buttons
+  linksContainer.innerHTML = '';
+  sites.forEach(createSiteButton);
+
+  reorderPanel.style.display = 'none';
+});
+
+
+    
   </script>
 </body>
 </html>
