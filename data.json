@@ -271,6 +271,14 @@
       "url": "https://github.com/UnityTechnologies",
       "faviconUrl": "https://www.google.com/s2/favicons?domain=github.com&sz=32",
       "sectionId": "section-developement"
+    },
+    {
+      "id": "17927723786180b34a0424cb1a",
+      "name": "Boxel",
+      "domain": "boxel-games.com",
+      "url": "https://boxel-games.com",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=boxel-games.com&sz=32",
+      "sectionId": "section-developement"
     }
   ]
 }
