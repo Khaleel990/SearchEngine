@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Work Page</title>
+  <title>MyPage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="Icon.png" />
+  <link rel="shortcut icon" type="image/png" href="Icon.png" />
+  <link rel="apple-touch-icon" href="Icon.png" />
   <style>
     :root {
       --bg-body: #080c14;
@@ -167,13 +170,20 @@
       width: 36px;
       height: 36px;
       border-radius: 9px;
-      background: linear-gradient(135deg, #1d4ed8, #0284c7);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
       flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 9px;
+      display: block;
     }
 
     .brand-info h2 {
@@ -428,6 +438,36 @@
       border-color: rgba(56, 189, 248, 0.4);
     }
 
+    .btn-simple-add {
+      height: 36px;
+      padding: 0 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-btn);
+      background: var(--bg-btn);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.84rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .btn-simple-add:hover {
+      background: var(--bg-btn-hover);
+      color: var(--tab-active-color);
+      border-color: var(--tab-active-border);
+    }
+
+    .btn-simple-add .add-plus {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--tab-active-color);
+      line-height: 1;
+    }
+
     .header-tab-meta {
       display: flex;
       align-items: center;
@@ -624,7 +664,16 @@
       border: 1px solid var(--border-card);
     }
 
-    .link-button span {
+    .link-button .link-label {
+      font-size: 0.92rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .link-button span:not(.link-thumb-arrow) {
       font-size: 0.92rem;
       font-weight: 500;
       overflow: hidden;
@@ -641,6 +690,162 @@
     .delete-mode-active .link-button:hover {
       border-color: #ef4444;
       background: rgba(127, 29, 29, 0.35);
+    }
+
+    /* ================= ATTACHED THUMBNAIL PREVIEW (RIGHT BELOW BUTTON ON 1-SEC HOVER) ================= */
+
+    .link-floating-preview {
+      position: fixed;
+      z-index: 1000;
+      width: 250px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      animation: previewSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    body.light-theme .link-floating-preview {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.15), 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    .link-floating-preview:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.48);
+    }
+
+    body.light-theme .link-floating-preview:hover {
+      box-shadow: 0 20px 44px rgba(2, 132, 199, 0.2);
+    }
+
+    @keyframes previewSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .floating-thumb-media {
+      position: relative;
+      width: 100%;
+      height: 145px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    body.light-theme .floating-thumb-media {
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    }
+
+    .floating-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .floating-thumb-img.loaded {
+      display: block;
+    }
+
+    .floating-thumb-loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      text-align: center;
+      padding: 0.75rem;
+    }
+
+    .floating-thumb-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2.5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: previewSpin 0.7s linear infinite;
+    }
+
+    .floating-thumb-body {
+      padding: 0.75rem 0.85rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .floating-thumb-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .floating-thumb-desc {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .floating-thumb-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid var(--border-sidebar);
+    }
+
+    .floating-thumb-favicon {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .floating-thumb-domain {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-decoration: underline;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+
+    .link-floating-preview:hover .floating-thumb-domain {
+      color: var(--tab-active-color);
     }
 
     /* ================= MODAL PANELS ================= */
@@ -856,9 +1061,11 @@
     <!-- Left Column: Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-logo">🌐</div>
+        <div class="brand-logo">
+          <img src="Icon.png" alt="Logo" class="brand-logo-img" />
+        </div>
         <div class="brand-info">
-          <h2>My Work Page</h2>
+          <h2>MyPage</h2>
           <span class="brand-badge" id="sidebar-stats">Collections</span>
         </div>
         <button type="button" id="sidebar-collapse-btn" class="sidebar-mini-add-btn" style="margin-left: auto; font-size: 0.85rem;" title="Hide Sidebar">◀</button>
@@ -920,8 +1127,9 @@
           <button type="button" id="theme-toggle-btn" class="icon-toggle-btn" title="Switch Bright / Dark Mode" aria-label="Toggle Bright / Dark Mode">
             <span id="theme-toggle-icon">☀️</span>
           </button>
-          <button type="button" id="open-panel-btn" class="btn btn-primary" title="Add Website Shortcut">
-            <span>＋</span> Add Shortcut
+          <button type="button" id="open-panel-btn" class="btn-simple-add" title="Add Website Shortcut">
+            <span class="add-plus">＋</span>
+            <span>Add</span>
           </button>
         </div>
       </header>
@@ -941,6 +1149,10 @@
       <div class="panel-group">
         <label for="site-domain">Website Domain or URL</label>
         <input type="text" id="site-domain" placeholder="e.g. google.com or https://..." />
+      </div>
+      <div class="panel-group">
+        <label for="site-name">Button Text / Label (Optional)</label>
+        <input type="text" id="site-name" placeholder="Leave blank for auto website name..." />
       </div>
       <div class="panel-group">
         <label for="site-section">Collection / Section</label>
@@ -1057,6 +1269,25 @@
     </div>
   </div>
 
+  <!-- Attached Link Thumbnail Preview (Displayed directly below clicked button) -->
+  <div id="link-floating-preview" class="link-floating-preview" title="Click to open website">
+    <div class="floating-thumb-media">
+      <img id="floating-thumb-img" class="floating-thumb-img" src="" alt="Thumbnail" />
+      <div id="floating-thumb-loader" class="floating-thumb-loader">
+        <div class="floating-thumb-spinner"></div>
+        <span>Loading preview...</span>
+      </div>
+    </div>
+    <div class="floating-thumb-body">
+      <div id="floating-thumb-title" class="floating-thumb-title">Site Title</div>
+      <div id="floating-thumb-desc" class="floating-thumb-desc">Website link guide</div>
+      <div class="floating-thumb-footer">
+        <img id="floating-thumb-favicon" class="floating-thumb-favicon" src="" alt="" />
+        <span id="floating-thumb-domain" class="floating-thumb-domain">domain.com</span>
+      </div>
+    </div>
+  </div>
+
   <script>
     const openPanelBtn = document.getElementById('open-panel-btn');
     const deleteModeBtn = document.getElementById('delete-mode-btn');
@@ -1065,6 +1296,7 @@
     const cancelPanelBtn = document.getElementById('cancel-panel-btn');
     const createSiteBtn = document.getElementById('create-site-btn');
     const siteDomainInput = document.getElementById('site-domain');
+    const siteNameInput = document.getElementById('site-name');
     const siteSectionSelect = document.getElementById('site-section');
     const sectionNewInput = document.getElementById('section-new-input');
     const newSectionBtn = document.getElementById('new-section-btn');
@@ -1945,6 +2177,189 @@
       saveSites();
     }
 
+    // ================= ATTACHED LINK THUMBNAIL PREVIEW (1-SEC HOVER) =================
+    let hoverTimer = null;
+    let closeTimer = null;
+    let activePreviewBtn = null;
+    let activePreviewSite = null;
+
+    const floatingPreview = document.getElementById('link-floating-preview');
+    const floatingImg = document.getElementById('floating-thumb-img');
+    const floatingLoader = document.getElementById('floating-thumb-loader');
+    const floatingTitle = document.getElementById('floating-thumb-title');
+    const floatingDesc = document.getElementById('floating-thumb-desc');
+    const floatingFavicon = document.getElementById('floating-thumb-favicon');
+    const floatingDomain = document.getElementById('floating-thumb-domain');
+
+    function positionFloatingPreview(btn) {
+      if (!floatingPreview || !btn) return;
+      const rect = btn.getBoundingClientRect();
+      const cardWidth = 250;
+
+      let left = rect.left;
+      if (left + cardWidth > window.innerWidth - 12) {
+        left = Math.max(12, rect.right - cardWidth);
+      }
+
+      let top = rect.bottom + 6;
+      if (top + 240 > window.innerHeight && rect.top - 240 > 10) {
+        top = rect.top - 240 - 6;
+      }
+
+      floatingPreview.style.top = `${top}px`;
+      floatingPreview.style.left = `${left}px`;
+      floatingPreview.style.width = `${cardWidth}px`;
+    }
+
+    function showButtonThumbnail(btn, site) {
+      if (deleteMode || reorderMode) return;
+      cancelClose();
+
+      if (activePreviewBtn === btn && floatingPreview && floatingPreview.style.display === 'flex') {
+        return;
+      }
+
+      activePreviewBtn = btn;
+      activePreviewSite = site;
+
+      if (floatingTitle) floatingTitle.textContent = site.name;
+      if (floatingFavicon) floatingFavicon.src = site.faviconUrl || '';
+
+      let domainStr = site.domain || '';
+      if (!domainStr && site.url) {
+        try {
+          domainStr = new URL(site.url).hostname.replace(/^www\./, '');
+        } catch (e) {
+          domainStr = site.url;
+        }
+      }
+      if (floatingDomain) floatingDomain.textContent = domainStr;
+
+      const sec = sections.find(s => s.id === site.sectionId);
+      const secName = sec ? sec.name : 'Shortcuts';
+      if (floatingDesc) {
+        floatingDesc.textContent = `${secName} collection • Click to visit ${domainStr}`;
+      }
+
+      if (floatingImg && floatingLoader) {
+        floatingImg.classList.remove('loaded');
+        floatingLoader.style.display = 'flex';
+        floatingLoader.innerHTML = `
+          <div class="floating-thumb-spinner"></div>
+          <span>Loading preview...</span>
+        `;
+
+        const primaryUrl = `https://s0.wp.com/mshots/v1/${encodeURIComponent(site.url)}?w=500`;
+        const fallbackUrl = `https://image.thum.io/get/width/500/crop/500/noanimate/${site.url}`;
+
+        const testImg = new Image();
+        testImg.onload = () => {
+          if (activePreviewSite === site) {
+            floatingImg.src = primaryUrl;
+            floatingImg.classList.add('loaded');
+            floatingLoader.style.display = 'none';
+          }
+        };
+        testImg.onerror = () => {
+          const fb = new Image();
+          fb.onload = () => {
+            if (activePreviewSite === site) {
+              floatingImg.src = fallbackUrl;
+              floatingImg.classList.add('loaded');
+              floatingLoader.style.display = 'none';
+            }
+          };
+          fb.onerror = () => {
+            if (activePreviewSite === site) {
+              floatingImg.classList.remove('loaded');
+              floatingLoader.innerHTML = `
+                <div style="font-size: 2rem; line-height: 1; margin-bottom: 0.25rem;">🌐</div>
+                <div style="font-weight: 600; color: var(--text-heading); font-size: 0.85rem;">${site.name}</div>
+              `;
+            }
+          };
+          fb.src = fallbackUrl;
+        };
+        testImg.src = primaryUrl;
+      }
+
+      positionFloatingPreview(btn);
+      floatingPreview.style.display = 'flex';
+    }
+
+    function closeButtonThumbnail() {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      if (floatingPreview) floatingPreview.style.display = 'none';
+      activePreviewBtn = null;
+      activePreviewSite = null;
+    }
+
+    function scheduleClose() {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        closeButtonThumbnail();
+      }, 250);
+    }
+
+    function cancelClose() {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+    }
+
+    if (floatingPreview) {
+      floatingPreview.addEventListener('mouseenter', () => {
+        cancelClose();
+      });
+
+      floatingPreview.addEventListener('mouseleave', () => {
+        scheduleClose();
+      });
+
+      floatingPreview.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activePreviewSite && activePreviewSite.url) {
+          window.open(activePreviewSite.url, '_blank');
+          closeButtonThumbnail();
+        }
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (floatingPreview && floatingPreview.style.display === 'flex') {
+        if (!floatingPreview.contains(e.target) && !e.target.closest('.link-button')) {
+          closeButtonThumbnail();
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (activePreviewBtn && floatingPreview && floatingPreview.style.display === 'flex') {
+        positionFloatingPreview(activePreviewBtn);
+      }
+    });
+
+    const linksScrollWrapper = document.querySelector('.links-scroll-wrapper');
+    if (linksScrollWrapper) {
+      linksScrollWrapper.addEventListener('scroll', () => {
+        if (activePreviewBtn && floatingPreview && floatingPreview.style.display === 'flex') {
+          positionFloatingPreview(activePreviewBtn);
+        }
+      }, { passive: true });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeButtonThumbnail();
+    });
+
     function createSiteButton(site) {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -1957,10 +2372,28 @@
       icon.alt = '';
 
       const label = document.createElement('span');
+      label.className = 'link-label';
       label.textContent = site.name;
 
       btn.appendChild(icon);
       btn.appendChild(label);
+
+      // Auto-show thumbnail preview on 1-second continuous hover
+      btn.addEventListener('mouseenter', () => {
+        cancelClose();
+        if (hoverTimer) clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => {
+          showButtonThumbnail(btn, site);
+        }, 1000);
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
+        scheduleClose();
+      });
 
       btn.addEventListener('dragstart', (e) => {
         if (!reorderMode) {
@@ -1997,6 +2430,7 @@
       });
 
       btn.addEventListener('click', () => {
+        closeButtonThumbnail();
         if (deleteMode) {
           const idx = sites.findIndex((s) => s.id === site.id);
           if (idx !== -1) {
@@ -2077,6 +2511,7 @@
     function closePanel() {
       panelBackdrop.style.display = 'none';
       siteDomainInput.value = '';
+      if (siteNameInput) siteNameInput.value = '';
       siteSectionSelect.value = '';
       sectionNewInput.value = '';
       sectionNewInput.classList.remove('show');
@@ -2253,7 +2688,12 @@
         base = base.slice(4);
       }
       const firstPart = base.split('.')[0] || base;
-      const name = firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+      const derivedName = firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+
+      // Use custom button text if written, otherwise use auto-derived name
+      const customText = siteNameInput ? siteNameInput.value.trim() : '';
+      const name = customText || derivedName;
+
       const faviconUrl =
         'https://www.google.com/s2/favicons?domain=' +
         encodeURIComponent(domainOnly) +
@@ -2291,6 +2731,17 @@
       renderSidebarTabs();
       switchTab(site.sectionId);
     });
+
+    if (siteDomainInput) {
+      siteDomainInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') createSiteBtn.click();
+      });
+    }
+    if (siteNameInput) {
+      siteNameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') createSiteBtn.click();
+      });
+    }
 
     // Load saved data on page load
     sections = loadSections();
