@@ -388,17 +388,45 @@
       justify-content: center;
       font-size: 1rem;
     }
- .delete-mode-btn.circular,
-.reorder-mode-btn.circular {
-  padding: 0 !important;   /* kill padding-inline */
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+    .delete-mode-btn.circular,
+    .reorder-mode-btn.circular {
+      padding: 0 !important;   /* kill padding-inline */
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .open-panel-btn.linked {
+      border-color: #22c55e !important;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.5) !important;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      color: #38bdf8;
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
 
   </style>
@@ -436,6 +464,21 @@
         <h3>Manage Sections</h3>
         <div id="sections-list-container"></div>
       </div>
+      <div class="panel-sections-list">
+        <h3>Local File Auto-Save</h3>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; gap: 0.5rem;">
+          <span id="file-link-status" style="font-size: 0.8rem; color: #9ca3af;">Auto-Save: Off</span>
+          <button type="button" id="panel-link-file-btn" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">🔗 Link data.json</button>
+        </div>
+      </div>
+      <div class="panel-sections-list">
+        <h3>Backup & Restore</h3>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button type="button" id="export-backup-btn" style="flex: 1; padding: 0.4rem 0.5rem; font-size: 0.8rem; justify-content: center;">💾 Export JSON</button>
+          <button type="button" id="import-backup-btn" style="flex: 1; padding: 0.4rem 0.5rem; font-size: 0.8rem; justify-content: center;">📂 Import JSON</button>
+        </div>
+        <input type="file" id="import-file-input" accept=".json" style="display: none;" />
+      </div>
       <div class="panel-actions">
         <button type="button" id="cancel-panel-btn">Cancel</button>
         <button type="button" id="create-site-btn">Create Button</button>
@@ -443,25 +486,28 @@
     </div>
   </div>
 
-  <button type="button" id="open-panel-btn" class="open-panel-btn circular">
-  <span class="plus-icon">+</span>
-</button>
+  <button type="button" id="open-panel-btn" class="open-panel-btn circular" title="Add Website Button">
+    <span class="plus-icon">+</span>
+  </button>
+  <button type="button" id="link-file-btn" class="open-panel-btn circular" style="right: 3.75rem;" title="Link data.json for automatic saving">
+    <span id="link-icon" style="font-size: 0.85rem;">🔗</span>
+  </button>
+  <button type="button" id="quick-export-btn" class="open-panel-btn circular" style="right: 6rem;" title="Download Backup (data.json)">
+    <span style="font-size: 0.85rem;">💾</span>
+  </button>
+  <button type="button" id="quick-import-btn" class="open-panel-btn circular" style="right: 8.25rem;" title="Import Backup JSON">
+    <span style="font-size: 0.85rem;">📂</span>
+  </button>
 
-<button type="button" id="delete-mode-btn" class="delete-mode-btn circular">
-  <span class="minus-icon">-</span>
-</button>
+  <button type="button" id="delete-mode-btn" class="delete-mode-btn circular" title="Delete Mode">
+    <span class="minus-icon">-</span>
+  </button>
 
-<button type="button" id="reorder-mode-btn" class="reorder-mode-btn circular">
-  <span class="reorder-icon">⇅</span>
-</button>
-<button type="button" id="reorder-section-btn" class="reorder-mode-btn circular" style="left: 4rem;">
-  <span class="reorder-icon">?</span>
-</button>
-
-
-
-
-   
+  <button type="button" id="reorder-mode-btn" class="reorder-mode-btn circular" title="Reorder Buttons">
+    <span class="reorder-icon">⇅</span>
+  </button>
+  <button type="button" id="reorder-section-btn" class="reorder-mode-btn circular" style="left: 4rem;" title="Reorder Sections">
+    <span class="reorder-icon">≡</span>
   </button>
 <div class="panel-backdrop" id="reorder-section-panel" style="display: none;">
   <div class="panel" role="dialog" aria-modal="true">
@@ -495,6 +541,15 @@
     const sectionNewInput = document.getElementById('section-new-input');
     const newSectionBtn = document.getElementById('new-section-btn');
     const linksContainer = document.getElementById('links-container');
+    const exportBackupBtn = document.getElementById('export-backup-btn');
+    const importBackupBtn = document.getElementById('import-backup-btn');
+    const importFileInput = document.getElementById('import-file-input');
+    const quickExportBtn = document.getElementById('quick-export-btn');
+    const quickImportBtn = document.getElementById('quick-import-btn');
+    const linkFileBtn = document.getElementById('link-file-btn');
+    const panelLinkFileBtn = document.getElementById('panel-link-file-btn');
+    const fileLinkStatus = document.getElementById('file-link-status');
+    const linkIcon = document.getElementById('link-icon');
 
     let deleteMode = false;
     let reorderMode = false;
@@ -502,10 +557,200 @@
     let dragSectionId = null;
     let sites = [];
     let sections = [];
+    let fileHandle = null;
+    let autoSaveTimer = null;
+
+    // Toast Notification helper
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // IndexedDB for persisting data.json FileSystemFileHandle
+    const IDB_NAME = 'SearchEngineStorage';
+    const IDB_STORE = 'handles';
+
+    function openIDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function storeFileHandle(handle) {
+      try {
+        const db = await openIDB();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(handle, 'dataJson');
+      } catch (e) {
+        console.warn('Could not persist file handle', e);
+      }
+    }
+
+    async function getStoredFileHandle() {
+      try {
+        const db = await openIDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).get('dataJson');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function updateFileLinkUI(isLinked) {
+      if (isLinked) {
+        if (linkFileBtn) {
+          linkFileBtn.classList.add('linked');
+          linkFileBtn.title = 'Linked to data.json (Auto-saving active)';
+        }
+        if (linkIcon) linkIcon.textContent = '🟢';
+        if (fileLinkStatus) {
+          fileLinkStatus.textContent = 'Auto-Save: 🟢 Active';
+          fileLinkStatus.style.color = '#4ade80';
+        }
+      } else {
+        if (linkFileBtn) {
+          linkFileBtn.classList.remove('linked');
+          linkFileBtn.title = 'Click to link data.json for automatic saving';
+        }
+        if (linkIcon) linkIcon.textContent = '🔗';
+        if (fileLinkStatus) {
+          fileLinkStatus.textContent = 'Auto-Save: Off (click Link)';
+          fileLinkStatus.style.color = '#9ca3af';
+        }
+      }
+    }
+
+    async function saveToFileHandle() {
+      if (!fileHandle) return;
+      try {
+        const query = await fileHandle.queryPermission({ mode: 'readwrite' });
+        if (query !== 'granted') {
+          const req = await fileHandle.requestPermission({ mode: 'readwrite' });
+          if (req !== 'granted') {
+            updateFileLinkUI(false);
+            return;
+          }
+        }
+        const writable = await fileHandle.createWritable();
+        const payload = JSON.stringify({ sections, sites }, null, 2);
+        await writable.write(payload);
+        await writable.close();
+        updateFileLinkUI(true);
+        showToast('✓ Auto-saved to ' + (fileHandle.name || 'data.json'));
+      } catch (err) {
+        console.warn('Could not write to linked file:', err);
+      }
+    }
+
+    function scheduleFileAutoSave() {
+      if (!fileHandle) return;
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        saveToFileHandle();
+      }, 350);
+    }
+
+    async function linkDataFile() {
+      if (!window.showOpenFilePicker) {
+        alert('Direct file auto-saving is supported on Chrome, Edge, and Chromium browsers. On other browsers, use the Export JSON button to download data.json.');
+        return;
+      }
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          types: [{
+            description: 'JSON file',
+            accept: { 'application/json': ['.json'] }
+          }],
+          multiple: false
+        });
+        if (!handle) return;
+        fileHandle = handle;
+        await storeFileHandle(handle);
+        updateFileLinkUI(true);
+        await saveToFileHandle();
+        showToast('🔗 Linked to ' + handle.name + '! Auto-save is active.');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Error selecting file:', err);
+        }
+      }
+    }
+
+    async function onLinkButtonClick() {
+      if (fileHandle) {
+        try {
+          const perm = await fileHandle.requestPermission({ mode: 'readwrite' });
+          if (perm === 'granted') {
+            updateFileLinkUI(true);
+            await saveToFileHandle();
+            showToast('✓ Auto-save active for ' + fileHandle.name);
+            return;
+          }
+        } catch(e) {}
+      }
+      await linkDataFile();
+    }
+
+    const DEFAULT_SECTIONS = [
+      { id: "section-code-ai", name: "Code-Ai", order: 0 },
+      { id: "section-game-store", name: "Game-Store", order: 1 },
+      { id: "section-my-boards", name: "My_Boards", order: 2 },
+      { id: "section-developement", name: "Developement", order: 3 },
+      { id: "section-designing", name: "Designing", order: 4 },
+      { id: "section-social-apps", name: "Social Apps", order: 5 }
+    ];
+
+    const DEFAULT_SITES = [
+      { id: "site-chatgpt", name: "Chatgpt", domain: "chatgpt.com", url: "https://chatgpt.com", faviconUrl: "https://www.google.com/s2/favicons?domain=chatgpt.com&sz=32", sectionId: "section-code-ai" },
+      { id: "site-gemini", name: "Gemini", domain: "gemini.google.com", url: "https://gemini.google.com", faviconUrl: "https://www.google.com/s2/favicons?domain=gemini.google.com&sz=32", sectionId: "section-code-ai" },
+      { id: "site-copilot", name: "Copilot", domain: "copilot.microsoft.com", url: "https://copilot.microsoft.com", faviconUrl: "https://www.google.com/s2/favicons?domain=copilot.microsoft.com&sz=32", sectionId: "section-code-ai" },
+      { id: "site-grok", name: "Grok", domain: "grok.com", url: "https://grok.com", faviconUrl: "https://www.google.com/s2/favicons?domain=grok.com&sz=32", sectionId: "section-code-ai" },
+      { id: "site-chat", name: "Chat", domain: "chat.deepseek.com", url: "https://chat.deepseek.com", faviconUrl: "https://www.google.com/s2/favicons?domain=chat.deepseek.com&sz=32", sectionId: "section-code-ai" },
+      { id: "site-claude", name: "Claude", domain: "claude.ai", url: "https://claude.ai", faviconUrl: "https://www.google.com/s2/favicons?domain=claude.ai&sz=32", sectionId: "section-code-ai" },
+      { id: "site-meta", name: "Meta", domain: "meta.ai", url: "https://meta.ai", faviconUrl: "https://www.google.com/s2/favicons?domain=meta.ai&sz=32", sectionId: "section-code-ai" },
+      { id: "site-play", name: "Play", domain: "play.google.com", url: "https://play.google.com", faviconUrl: "https://www.google.com/s2/favicons?domain=play.google.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-apple-apps", name: "Apps", domain: "apps.apple.com", url: "https://apps.apple.com", faviconUrl: "https://www.google.com/s2/favicons?domain=apps.apple.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-poki", name: "Poki", domain: "poki.com", url: "https://poki.com", faviconUrl: "https://www.google.com/s2/favicons?domain=poki.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-ms-apps", name: "Apps", domain: "apps.microsoft.com", url: "https://apps.microsoft.com", faviconUrl: "https://www.google.com/s2/favicons?domain=apps.microsoft.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-epic-store", name: "Store", domain: "store.epicgames.com", url: "https://store.epicgames.com", faviconUrl: "https://www.google.com/s2/favicons?domain=store.epicgames.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-steam-store", name: "Store", domain: "store.steampowered.com", url: "https://store.steampowered.com", faviconUrl: "https://www.google.com/s2/favicons?domain=store.steampowered.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-crazygames", name: "Crazygames", domain: "crazygames.com", url: "https://crazygames.com", faviconUrl: "https://www.google.com/s2/favicons?domain=crazygames.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-xbox", name: "Xbox", domain: "xbox.com", url: "https://xbox.com", faviconUrl: "https://www.google.com/s2/favicons?domain=xbox.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-playstation-store", name: "Store", domain: "store.playstation.com", url: "https://store.playstation.com", faviconUrl: "https://www.google.com/s2/favicons?domain=store.playstation.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-galaxystore", name: "Galaxystore", domain: "galaxystore.samsung.com", url: "https://galaxystore.samsung.com", faviconUrl: "https://www.google.com/s2/favicons?domain=galaxystore.samsung.com&sz=32", sectionId: "section-game-store" },
+      { id: "site-cafebazaar", name: "Cafebazaar", domain: "cafebazaar.ir", url: "https://cafebazaar.ir", faviconUrl: "https://www.google.com/s2/favicons?domain=cafebazaar.ir&sz=32", sectionId: "section-game-store" },
+      { id: "site-figma", name: "Figma", domain: "figma.com", url: "https://figma.com", faviconUrl: "https://www.google.com/s2/favicons?domain=figma.com&sz=32", sectionId: "section-my-boards" },
+      { id: "site-miro", name: "Miro", domain: "miro.com", url: "https://miro.com", faviconUrl: "https://www.google.com/s2/favicons?domain=miro.com&sz=32", sectionId: "section-my-boards" },
+      { id: "site-excalidraw", name: "Excalidraw", domain: "excalidraw.com", url: "https://excalidraw.com", faviconUrl: "https://www.google.com/s2/favicons?domain=excalidraw.com&sz=32", sectionId: "section-my-boards" },
+      { id: "site-onenote", name: "Onenote", domain: "onenote.com", url: "https://onenote.com", faviconUrl: "https://www.google.com/s2/favicons?domain=onenote.com&sz=32", sectionId: "section-my-boards" },
+      { id: "site-docs", name: "Docs", domain: "docs.google.com", url: "https://docs.google.com", faviconUrl: "https://www.google.com/s2/favicons?domain=docs.google.com&sz=32", sectionId: "section-my-boards" },
+      { id: "site-github", name: "Github", domain: "github.com", url: "https://github.com", faviconUrl: "https://www.google.com/s2/favicons?domain=github.com&sz=32", sectionId: "section-developement" },
+      { id: "site-magnific", name: "Magnific", domain: "magnific.ai", url: "https://magnific.ai", faviconUrl: "https://www.google.com/s2/favicons?domain=magnific.ai&sz=32", sectionId: "section-designing" },
+      { id: "site-pinterest", name: "Pinterest", domain: "pinterest.com", url: "https://pinterest.com", faviconUrl: "https://www.google.com/s2/favicons?domain=pinterest.com&sz=32", sectionId: "section-designing" },
+      { id: "site-iloveimg", name: "Iloveimg", domain: "iloveimg.com", url: "https://iloveimg.com", faviconUrl: "https://www.google.com/s2/favicons?domain=iloveimg.com&sz=32", sectionId: "section-designing" },
+      { id: "site-sketchfab", name: "Sketchfab", domain: "sketchfab.com", url: "https://sketchfab.com", faviconUrl: "https://www.google.com/s2/favicons?domain=sketchfab.com&sz=32", sectionId: "section-designing" },
+      { id: "site-reddit", name: "Reddit", domain: "reddit.com", url: "https://reddit.com", faviconUrl: "https://www.google.com/s2/favicons?domain=reddit.com&sz=32", sectionId: "section-social-apps" },
+      { id: "site-linkedin", name: "Linkedin", domain: "linkedin.com", url: "https://linkedin.com", faviconUrl: "https://www.google.com/s2/favicons?domain=linkedin.com&sz=32", sectionId: "section-social-apps" }
+    ];
 
     function saveSites() {
       try {
         localStorage.setItem('myfiles_saved_sites', JSON.stringify(sites));
+        scheduleFileAutoSave();
       } catch (e) {
         console.warn('Could not save sites', e);
       }
@@ -514,6 +759,7 @@
     function saveSections() {
       try {
         localStorage.setItem('myfiles_saved_sections', JSON.stringify(sections));
+        scheduleFileAutoSave();
       } catch (e) {
         console.warn('Could not save sections', e);
       }
@@ -522,29 +768,72 @@
     function loadSites() {
       try {
         const raw = localStorage.getItem('myfiles_saved_sites');
-        if (!raw) return [];
+        if (!raw) return DEFAULT_SITES;
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       } catch (e) {
         console.warn('Could not load sites', e);
       }
-      return [];
+      return DEFAULT_SITES;
     }
 
     function loadSections() {
       try {
         const raw = localStorage.getItem('myfiles_saved_sections');
-        if (!raw) return [];
+        if (!raw) return DEFAULT_SECTIONS;
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       } catch (e) {
         console.warn('Could not load sections', e);
       }
-      return [];
+      return DEFAULT_SECTIONS;
+    }
+
+    function exportBackup() {
+      const data = {
+        sections: sections,
+        sites: sites
+      };
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importBackup(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.sections) && Array.isArray(parsed.sites)) {
+            sections = parsed.sections;
+            sites = parsed.sites;
+            saveSections();
+            saveSites();
+            linksContainer.innerHTML = '';
+            sites.forEach(createSiteButton);
+            updateSectionDropdown();
+            renderSectionsList();
+            alert('Backup successfully imported!');
+          } else {
+            alert('Invalid backup file structure. Expected { sections: [...], sites: [...] }');
+          }
+        } catch (err) {
+          alert('Failed to parse backup JSON file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
     function updateSectionDropdown() {
@@ -1193,8 +1482,52 @@ applyReorderSectionBtn.addEventListener('click', () => {
   reorderPanel.style.display = 'none';
 });
 
+// -------------------- Backup & Restore Handlers --------------------
+if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
+if (quickExportBtn) quickExportBtn.addEventListener('click', exportBackup);
 
+if (importBackupBtn) {
+  importBackupBtn.addEventListener('click', () => {
+    if (importFileInput) importFileInput.click();
+  });
+}
+if (quickImportBtn) {
+  quickImportBtn.addEventListener('click', () => {
+    if (importFileInput) importFileInput.click();
+  });
+}
+
+if (importFileInput) {
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      importBackup(file);
+      importFileInput.value = '';
+    }
+  });
+}
+
+// -------------------- File Auto-Save Handlers --------------------
+if (linkFileBtn) linkFileBtn.addEventListener('click', onLinkButtonClick);
+if (panelLinkFileBtn) panelLinkFileBtn.addEventListener('click', onLinkButtonClick);
+
+// On startup: check for saved fileHandle and restore auto-saving
+(async function initLinkedFile() {
+  try {
+    const savedHandle = await getStoredFileHandle();
+    if (savedHandle) {
+      fileHandle = savedHandle;
+      const perm = await fileHandle.queryPermission({ mode: 'readwrite' });
+      updateFileLinkUI(perm === 'granted');
+    } else {
+      updateFileLinkUI(false);
+    }
+  } catch (e) {
+    updateFileLinkUI(false);
+  }
+})();
     
   </script>
+  <div class="toast-msg" id="toast-msg"></div>
 </body>
 </html>
