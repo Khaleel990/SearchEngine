@@ -217,14 +217,6 @@
       "sectionId": "section-my-boards"
     },
     {
-      "id": "site-github",
-      "name": "Github",
-      "domain": "github.com",
-      "url": "https://github.com",
-      "faviconUrl": "https://www.google.com/s2/favicons?domain=github.com&sz=32",
-      "sectionId": "section-developement"
-    },
-    {
       "id": "site-magnific",
       "name": "Magnific",
       "domain": "magnific.ai",
@@ -271,6 +263,14 @@
       "url": "https://linkedin.com",
       "faviconUrl": "https://www.google.com/s2/favicons?domain=linkedin.com&sz=32",
       "sectionId": "section-social-apps"
+    },
+    {
+      "id": "17927706336420b2da1125ead",
+      "name": "Unity Technologies",
+      "domain": "https://github.com/UnityTechnologies",
+      "url": "https://github.com/UnityTechnologies",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=github.com&sz=32",
+      "sectionId": "section-developement"
     }
   ]
 }
