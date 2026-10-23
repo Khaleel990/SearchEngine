@@ -1222,25 +1222,6 @@
           </div>
         </div>
 
-        <!-- Fetch Data from URL -->
-        <div class="settings-card">
-          <div class="settings-card-title">🌐 Fetch Data from URL</div>
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem;">
-            <input 
-              type="text" 
-              id="fetch-data-url-input" 
-              placeholder="e.g. https://.../data.json or ./data.json" 
-              style="flex: 1; font-size: 0.82rem;"
-            />
-            <button type="button" id="fetch-data-url-btn" class="btn btn-primary" style="white-space: nowrap; font-size: 0.82rem; padding: 0.5rem 0.85rem;">
-              <span>🌐</span> Fetch Data
-            </button>
-          </div>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">
-            Fetches sections & shortcuts from your URL and sets the page according to it.
-          </div>
-        </div>
-
         <!-- Local Storage & Auto-Save -->
         <div class="settings-card">
           <div class="settings-card-title">💾 Local Storage & Auto-Save</div>
@@ -1926,63 +1907,6 @@
       return true;
     }
 
-    const REMOTE_DATA_URL_KEY = 'myfiles_remote_url';
-
-    async function fetchFromUrl(customUrl = null) {
-      const urlInput = document.getElementById('fetch-data-url-input');
-      const fetchBtn = document.getElementById('fetch-data-url-btn');
-      let targetUrl = (customUrl || (urlInput ? urlInput.value : '')).trim();
-
-      if (!targetUrl) {
-        showToast('⚠️ Please enter a data URL');
-        if (urlInput) urlInput.focus();
-        return;
-      }
-
-      // Convenience: auto-convert GitHub blob URLs to raw.githubusercontent.com
-      if (targetUrl.includes('github.com/') && targetUrl.includes('/blob/')) {
-        targetUrl = targetUrl.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/');
-        if (urlInput) urlInput.value = targetUrl;
-      }
-
-      localStorage.setItem(REMOTE_DATA_URL_KEY, targetUrl);
-
-      if (fetchBtn) {
-        fetchBtn.disabled = true;
-        fetchBtn.innerHTML = '<span>⏳</span> Fetching...';
-      }
-
-      try {
-        let requestUrl = targetUrl;
-        if (!targetUrl.startsWith('data:')) {
-          const sep = targetUrl.includes('?') ? '&' : '?';
-          requestUrl = targetUrl + sep + 't=' + Date.now();
-        }
-
-        const response = await fetch(requestUrl, { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} (${response.statusText || 'Error'})`);
-        }
-
-        const data = await response.json();
-        if (!data || !Array.isArray(data.sections) || !Array.isArray(data.sites)) {
-          throw new Error('Invalid JSON format: expected "sections" and "sites" arrays');
-        }
-
-        applyImportedData(data, true, `✓ Loaded ${data.sites.length} shortcuts in ${data.sections.length} sections!`);
-        console.log('✓ Successfully fetched data from URL:', targetUrl);
-      } catch (err) {
-        console.error('Fetch Data error:', err);
-        showToast('⚠️ Failed to fetch: ' + err.message);
-        alert('Failed to fetch data from URL:\n\n' + err.message + '\n\nNote: If using GitHub, make sure the URL is public and CORS is allowed (e.g. raw.githubusercontent.com or GitHub Pages).');
-      } finally {
-        if (fetchBtn) {
-          fetchBtn.disabled = false;
-          fetchBtn.innerHTML = '<span>🌐</span> Fetch Data';
-        }
-      }
-    }
-
     async function autoSyncDataJson(force = false) {
       const syncBtn = document.getElementById('quick-sync-btn');
       if (syncBtn && force) {
@@ -1990,24 +1914,16 @@
         syncBtn.innerHTML = '<span>⏳</span> Syncing...';
       }
 
-      const configuredUrl = (localStorage.getItem(REMOTE_DATA_URL_KEY) || './data.json').trim();
-
       try {
-        let requestUrl = configuredUrl;
-        if (!configuredUrl.startsWith('data:')) {
-          const sep = configuredUrl.includes('?') ? '&' : '?';
-          requestUrl = configuredUrl + sep + 'v=' + Date.now();
-        }
-
-        const response = await fetch(requestUrl, { cache: 'no-store' });
+        const response = await fetch('./data.json?v=' + Date.now(), { cache: 'no-store' });
         if (!response.ok) {
-          if (force) showToast('⚠️ Could not fetch data (HTTP ' + response.status + ')');
+          if (force) showToast('⚠️ Could not fetch data.json (HTTP ' + response.status + ')');
           return;
         }
 
         const remoteData = await response.json();
         if (!Array.isArray(remoteData.sections) || !Array.isArray(remoteData.sites)) {
-          if (force) showToast('⚠️ Invalid data structure from URL');
+          if (force) showToast('⚠️ Invalid data.json structure');
           return;
         }
 
@@ -2020,18 +1936,18 @@
                             localSectionsRaw === JSON.stringify(remoteData.sections);
 
         if (isIdentical) {
-          if (force) showToast('✓ Already up to date!');
+          if (force) showToast('✓ Already up to date with data.json!');
           return;
         }
 
         if (force || !hasLocalData || !hasLocalEdits) {
           applyImportedData(remoteData, false);
           if (force) {
-            showToast('✓ Successfully synced with data!');
+            showToast('✓ Successfully synced with data.json!');
           } else if (hasLocalData) {
-            showToast('🔄 Updated with latest data from URL');
+            showToast('🔄 Updated with latest data from data.json');
           }
-          console.log('✓ Synced with data from:', configuredUrl);
+          console.log('✓ Synced with data.json from server.');
         } else {
           showToast('ℹ️ New data in data.json! Open Settings > Sync to update.');
         }
@@ -3011,26 +2927,7 @@ applyReorderSectionBtn.addEventListener('click', () => {
   switchTab(activeTabId);
 });
 
-// -------------------- Remote URL Fetch & Backup Handlers --------------------
-const fetchDataUrlInput = document.getElementById('fetch-data-url-input');
-const fetchDataUrlBtn = document.getElementById('fetch-data-url-btn');
-
-if (fetchDataUrlInput) {
-  fetchDataUrlInput.value = localStorage.getItem(REMOTE_DATA_URL_KEY) || './data.json';
-  fetchDataUrlInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      fetchFromUrl();
-    }
-  });
-}
-
-if (fetchDataUrlBtn) {
-  fetchDataUrlBtn.addEventListener('click', () => {
-    fetchFromUrl();
-  });
-}
-
+// -------------------- Backup & Restore Handlers --------------------
 const quickSyncBtn = document.getElementById('quick-sync-btn');
 if (quickSyncBtn) {
   quickSyncBtn.addEventListener('click', () => {
