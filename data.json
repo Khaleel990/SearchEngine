@@ -29,6 +29,21 @@
       "id": "section-social-apps",
       "name": "Social Apps",
       "order": 5
+    },
+    {
+      "id": "section-17930328218937454c8d3aed66",
+      "name": "Sounds",
+      "order": 6
+    },
+    {
+      "id": "section-1793075885110ac769b65843d4",
+      "name": "Unity Assets",
+      "order": 7
+    },
+    {
+      "id": "section-1793191859950f9bf92a35eeea",
+      "name": "Misc.",
+      "order": 8
     }
   ],
   "sites": [
@@ -279,6 +294,54 @@
       "url": "https://boxel-games.com",
       "faviconUrl": "https://www.google.com/s2/favicons?domain=boxel-games.com&sz=32",
       "sectionId": "section-developement"
+    },
+    {
+      "id": "1793032885196a657ae4c646568",
+      "name": "MP3 Cutter",
+      "domain": "https://mp3cut.net/",
+      "url": "https://mp3cut.net/",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=mp3cut.net&sz=32",
+      "sectionId": "section-17930328218937454c8d3aed66"
+    },
+    {
+      "id": "17930747050139ff1d234b01fc",
+      "name": "Pixabay",
+      "domain": "https://pixabay.com/sound-effects/search/click/",
+      "url": "https://pixabay.com/sound-effects/search/click/",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=pixabay.com&sz=32",
+      "sectionId": "section-17930328218937454c8d3aed66"
+    },
+    {
+      "id": "179307591062278dcb651cccad",
+      "name": "Incern",
+      "domain": "https://incern.org/",
+      "url": "https://incern.org/",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=incern.org&sz=32",
+      "sectionId": "section-1793075885110ac769b65843d4"
+    },
+    {
+      "id": "17931918765102b157fa4635ad",
+      "name": "Mapgenie",
+      "domain": "https://mapgenie.io/",
+      "url": "https://mapgenie.io/",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=mapgenie.io&sz=32",
+      "sectionId": "section-1793191859950f9bf92a35eeea"
+    },
+    {
+      "id": "1793336086889e44f6eafc0e858",
+      "name": "Birds_Level",
+      "domain": "https://docs.google.com/spreadsheets/d/1WgQCcKvtLi_P1Gl7_wqrbZMsl9nRy7Xavc_xxCYTdk0/edit?gid=0#gid=0",
+      "url": "https://docs.google.com/spreadsheets/d/1WgQCcKvtLi_P1Gl7_wqrbZMsl9nRy7Xavc_xxCYTdk0/edit?gid=0#gid=0",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=docs.google.com&sz=32",
+      "sectionId": "section-my-boards"
+    },
+    {
+      "id": "1793346641061e32e87f1d82b58",
+      "name": "Freesound",
+      "domain": "https://freesound.org/",
+      "url": "https://freesound.org/",
+      "faviconUrl": "https://www.google.com/s2/favicons?domain=freesound.org&sz=32",
+      "sectionId": "section-17930328218937454c8d3aed66"
     }
   ]
 }
